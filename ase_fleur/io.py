@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Reads Fleur files.
 
 Read structures from inpgen input files or inp.xml files
@@ -17,17 +18,20 @@ from masci_tools.io.io_fleurxml import load_inpxml
 from masci_tools.util.xml.xml_getters import get_structure_data
 
 
-inpgen_format = ExternalIOFormat(desc='FLEUR inpgen input file',
-                                 code='1F',
-                                 module='ase_fleur.io',
-                                    magic=[b'*inpgen *', b'*input generator *'],
-                                    glob = 'inp_*')
+inpgen_format = ExternalIOFormat(
+    desc="FLEUR inpgen input file",
+    code="1F",
+    module="ase_fleur.io",
+    magic=[b"*inpgen *", b"*input generator *"],
+    glob="inp_*",
+)
 
-xml_format =  ExternalIOFormat(desc='FLEUR XML input file',
-                                 code='1F',
-                                 module='ase_fleur.io',
-                                    magic=b'*fleurInputVersion *',)
-
+xml_format = ExternalIOFormat(
+    desc="FLEUR XML input file",
+    code="1F",
+    module="ase_fleur.io",
+    magic=b"*fleurInputVersion *",
+)
 
 
 def read_fleur_inpgen(fileobj, index=-1):
@@ -66,9 +70,7 @@ def read_fleur_xml(fileobj, index=-1):
     """
 
     xmltree, schema_dict = load_inpxml(fileobj)
-    atoms, cell, pbc = get_structure_data(
-        xmltree, schema_dict, site_namedtuple=True, convert_to_angstroem=False
-    )
+    atoms, cell, pbc = get_structure_data(xmltree, schema_dict, site_namedtuple=True, convert_to_angstroem=False)
     positions, symbols, _ = zip(*atoms)
 
     return Atoms(symbols=symbols, positions=positions, pbc=pbc, cell=cell)
