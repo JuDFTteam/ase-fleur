@@ -22,9 +22,7 @@ setup(
         "ase",
         "masci-tools>=0.5.0",
     ],
-    entry_points={'ase.ioformats': ['fleur-inpgen = ase_fleur.io:inpgen_format',
-                                     'fleur-xml= ase_fleur.io:xml_format'
-                                     ]},
+    entry_points={"ase.ioformats": ["fleur-inpgen = ase_fleur.io:inpgen_format", "fleur-xml= ase_fleur.io:xml_format"]},
     extras_require={},
     package_data={},
     author="Henning Janssen",
