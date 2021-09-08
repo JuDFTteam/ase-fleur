@@ -30,7 +30,7 @@ xml_format = ExternalIOFormat(
     desc="FLEUR XML input file",
     code="1F",
     module="ase_fleur.io",
-    magic=b"*fleurInputVersion *",
+    magic=b"*fleurInputVersion*",
 )
 
 
