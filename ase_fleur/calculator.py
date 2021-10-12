@@ -32,8 +32,9 @@ class FleurProfile:
         from subprocess import check_output
         import tempfile
 
-        with tempfile.TemporaryFile("w") as err:
-            out = check_output(self.argv + ["-info"], stderr=err).decode("utf-8")
+        with tempfile.TemporaryDirectory() as td:
+            with open(Path(td) / "err", "w") as err:
+                out = check_output(self.argv + ["-info"], stderr=err, cwd=td).decode("utf-8")
         m = re.findall(r"^(.*)\(www\.max\-centre\.eu\)", out, flags=re.MULTILINE)
         if not m:
             raise ValueError(f"Could not retrieve version from output: {out}")
