@@ -8,4 +8,4 @@ from ase_fleur.calculator import Fleur, FleurProfile
 register_calculator_class('fleur', Fleur)
 
 __all__ = ('Fleur', 'FleurProfile')
-__version__ = "0.1.0"
+__version__ = "0.0.1"
