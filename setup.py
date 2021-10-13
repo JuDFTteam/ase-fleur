@@ -32,7 +32,7 @@ setup(
     author_email="he.janssen@fz-juelich.de",
     maintainer="Henning Janssen",
     url="https://github.com/janssenhenning/ase-fleur",
-    license="BSD",
+    license="MIT",
     description="Package adding IO/calculator functionalities for the FLEUR code to the ase package.",
     long_description=desc,
     keywords=["ase"],
