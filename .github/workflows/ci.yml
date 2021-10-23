@@ -22,7 +22,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install git+https://gitlab.com/ase/ase.git@external_io_formats
-        pip install -e .
+        pip install -e .[pre-commit]
     - name: Run pre-commit
       run: |
         pre-commit run --all-files || (git status --short; git diff ; exit 1)
@@ -46,7 +46,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install git+https://gitlab.com/ase/ase.git@external_io_formats
-        pip install -e .
+        pip install -e .[test]
     - name: pytest
       run: |
         pytest tests/

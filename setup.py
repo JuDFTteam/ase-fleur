@@ -22,6 +22,15 @@ setup(
         "ase",
         "masci-tools>=0.5.0",
     ],
+    extras_require = {
+        'pre-commit': [
+            'pre-commit',
+            'pylint'
+        ],
+        'test': [
+            'pytest',
+        ]
+    },
     entry_points={
         "ase.ioformats": ["fleur-inpgen = ase_fleur.io:inpgen_format", "fleur-xml= ase_fleur.io:xml_format"],
         "ase.calculator": ["fleur = ase_fleur.calculator:Fleur"],
