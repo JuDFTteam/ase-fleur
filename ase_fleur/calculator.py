@@ -122,7 +122,7 @@ class FleurTemplate(CalculatorTemplate):
             fm.set_inpchanges({"itmax": self.iter_per_run})
             fm.add_task_list(inp_changes)
             xmltree, _ = fm.modify_xmlfile(directory / "inp.xml")
-            xmltree.write(directory / self.input_file, encoding="utf-8", pretty_print=True)
+            xmltree.write(directory / "inp.xml", encoding="utf-8", pretty_print=True)
 
     def execute(self, directory, profile) -> None:
         """
