@@ -10,7 +10,8 @@ from masci_tools.io.fleurxmlmodifier import FleurXMLModifier
 from masci_tools.io.parsers.fleur import outxml_parser
 
 from ase.calculators.genericfileio import GenericFileIOCalculator, CalculatorTemplate
-from ase.io import write
+
+from ase_fleur.io import write_fleur_inpgen
 
 
 class FleurProfile:
@@ -95,6 +96,7 @@ class FleurTemplate(CalculatorTemplate):
                            Changes to be done after the inpgen was run
                            can be specified in the entry inpxml_changes
         """
+
         # Sketch
         # 1. Create inpgen input using the fleur IO format
         directory = Path(directory)
@@ -109,7 +111,7 @@ class FleurTemplate(CalculatorTemplate):
                 parameters["title"] += " (inpgen)"
 
         inputfile = directory / "fleur.in"
-        write(inputfile, atoms, parameters=parameters, format="fleur-inpgen")
+        write_fleur_inpgen(inputfile, atoms, parameters=parameters)
 
         # 2. Run inpgen
         self.execute_inpgen(directory, self.inpgen_profile, inputfile)
