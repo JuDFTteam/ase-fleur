@@ -35,7 +35,6 @@ setup(
         "ase.ioformats": ["fleur-inpgen = ase_fleur.io:inpgen_format", "fleur-xml= ase_fleur.io:xml_format"],
         "ase.calculator": ["fleur = ase_fleur.calculator:Fleur"],
     },
-    extras_require={},
     package_data={},
     author="Henning Janssen",
     author_email="he.janssen@fz-juelich.de",
