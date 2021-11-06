@@ -6,6 +6,7 @@ Package adding IO/calculator functionalities for the [FLEUR code](https://www.fl
 By installing this package ase gains the ability to read/write the following files
 
 - ``.xml`` files used by the Fleur code (read-only) (format name ``fleur-xml``)
+- ``out.xml`` files produced by the Fleur code (read-only) (format name ``fleur-outxml``)
 - input files for the Fleur input generator (``inpgen`` or ``input generator`` have to appear in the title comment for automatic detection) (format name ``fleur-inpgen``)
 
 ```python

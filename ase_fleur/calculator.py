@@ -11,7 +11,7 @@ from masci_tools.io.parsers.fleur import outxml_parser
 
 from ase.calculators.genericfileio import GenericFileIOCalculator, CalculatorTemplate
 
-from ase_fleur.io import write_fleur_inpgen
+from ase_fleur.io import write_fleur_inpgen, read_fleur_outxml
 
 
 class FleurProfile:
@@ -78,8 +78,9 @@ class FleurTemplate(CalculatorTemplate):
 
     def __init__(self, *, inpgen_profile):
         super().__init__(name="fleur", implemented_properties=("energy"))
-        self.output_file = "fleur.log"
+        self.stdout_file = "fleur.log"
         self.error_file = "error.log"
+        self.output_file = "out.xml"
         self.inpgen_profile = inpgen_profile
         self.max_runs = 3
         self.iter_per_run = 30
@@ -135,16 +136,8 @@ class FleurTemplate(CalculatorTemplate):
         converged = False
         run = 1
         while not converged and run <= self.max_runs:
-            profile.run(directory, self.output_file, self.error_file)
-
-            fleur_results = outxml_parser(directory / "out.xml")
-
-            if "overall_density_convergence" in fleur_results:
-                distance = fleur_results["overall_density_convergence"]
-            else:
-                distance = fleur_results.get("density_convergence")
-
-            converged = distance < self.distance_converged
+            profile.run(directory, self.stdout_file, self.error_file)
+            converged = self.check_convergence(directory)
 
     def execute_inpgen(self, directory, profile, inputfile) -> None:
         """
@@ -154,25 +147,31 @@ class FleurTemplate(CalculatorTemplate):
         :param profile: FleurProfile to use
         :param inputfile: Path to the inputfile to use
         """
-        profile.run_inpgen(directory, inputfile, self.output_file, self.error_file)
+        profile.run_inpgen(directory, inputfile, self.stdout_file, self.error_file)
 
-    def read_results(self, directory):
+    def check_convergence(self, directory):
         """
-        Read the calculation results from the produced out.xml
+        Check if the calculation is converged
 
-        :param directory: Path to the calculation driectory
+        :param directory: Path to the calculation directory
         """
-        fleur_results = outxml_parser(directory / "out.xml")
+        fleur_results = outxml_parser(directory / self.output_file)
 
         if "overall_density_convergence" in fleur_results:
             distance = fleur_results["overall_density_convergence"]
         else:
             distance = fleur_results.get("density_convergence")
 
-        if not distance < self.distance_converged:
-            raise RuntimeError("Fleur calculation did not converge")
+        return distance < self.distance_converged
 
-        return fleur_results
+    def read_results(self, directory):
+        """
+        Read the calculation results from the produced out.xml
+
+        :param directory: Path to the calculation directory
+        """
+        atoms = read_fleur_outxml(directory / self.output_file)
+        return dict(atoms.calc.properties())
 
 
 class Fleur(GenericFileIOCalculator):

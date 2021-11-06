@@ -29,7 +29,11 @@ setup(
         ],
     },
     entry_points={
-        "ase.ioformats": ["fleur-inpgen = ase_fleur.io:inpgen_format", "fleur-xml= ase_fleur.io:xml_format"],
+        "ase.ioformats": [
+            "fleur-inpgen = ase_fleur.io:inpgen_format",
+            "fleur-outxml= ase_fleur.io:outxml_format",
+            "fleur-xml= ase_fleur.io:xml_format",
+        ],
         "ase.calculator": ["fleur = ase_fleur.calculator:Fleur"],
     },
     package_data={},

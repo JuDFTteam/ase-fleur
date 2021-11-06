@@ -33,3 +33,20 @@ def test_read_fleur_xml():
     assert atoms.cell[:] == pytest.approx(
         np.array([[0.0, 5.13060853, 5.13060853], [5.13060853, 0.0, 5.13060853], [5.13060853, 5.13060853, 0.0]])
     )
+
+
+def test_read_fleur_outxml():
+    atoms = read(TEST_FILES_DIR / "out.xml")
+
+    assert all(atoms.symbols == "Si")
+    assert atoms.positions == pytest.approx(
+        np.array([[1.28265213, 1.28265213, 1.28265213], [-1.28265213, -1.28265213, -1.28265213]])
+    )
+    assert all(atoms.pbc)
+    assert atoms.cell[:] == pytest.approx(
+        np.array([[0.0, 5.13060853, 5.13060853], [5.13060853, 0.0, 5.13060853], [5.13060853, 5.13060853, 0.0]])
+    )
+    assert dict(atoms.calc.properties()) == {
+        "fermi_level": pytest.approx(0.1848170588),
+        "energy": pytest.approx(-15784.360931872383),
+    }

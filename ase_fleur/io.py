@@ -10,12 +10,18 @@ The package masci-tools (version 0.4.11 or greater) is required by this module:
     masci-tools - https://pypi.org/project/masci-tools/
 
 """
+import io
+
 from ase.atoms import Atoms
+from ase.calculators.singlepoint import SinglePointDFTCalculator
 from ase.utils import writer
 from ase.utils.plugins import ExternalIOFormat
+
+
 from masci_tools.io.fleur_inpgen import write_inpgen_file, read_inpgen_file
-from masci_tools.io.io_fleurxml import load_inpxml
-from masci_tools.util.xml.xml_getters import get_structure_data
+from masci_tools.io.io_fleurxml import load_inpxml, load_outxml
+from masci_tools.util.xml.xml_getters import get_structure_data, get_kpoints_data
+from masci_tools.io.parsers.fleur import outxml_parser
 
 
 inpgen_format = ExternalIOFormat(
@@ -31,6 +37,13 @@ xml_format = ExternalIOFormat(
     code="1F",
     module="ase_fleur.io",
     magic=b"*fleurInputVersion*",
+)
+
+outxml_format = ExternalIOFormat(
+    desc="FLEUR output XML input file",
+    code="1F",
+    module="ase_fleur.io",
+    magic=b"*fleurOutputVersion*",
 )
 
 
@@ -68,12 +81,50 @@ def read_fleur_xml(fileobj, index=-1):
     index: integer -1
         Not used in this implementation.
     """
+    try:
+        xmltree, schema_dict = load_outxml(fileobj)
+    except (ValueError, IndexError):
+        if isinstance(fileobj, io.IOBase):
+            fileobj.seek(0)
+        xmltree, schema_dict = load_inpxml(fileobj)
 
-    xmltree, schema_dict = load_inpxml(fileobj)
     atoms, cell, pbc = get_structure_data(xmltree, schema_dict, site_namedtuple=True, convert_to_angstroem=False)
     positions, symbols, _ = zip(*atoms)
 
     return Atoms(symbols=symbols, positions=positions, pbc=pbc, cell=cell)
+
+
+def read_fleur_outxml(fileobj, index=-1):
+    """Reads structure and results from fleur out.xml file.
+
+    Parameters
+    ----------
+    fileobj: file object
+        File handle from which data should be read.
+
+    Other parameters
+    ----------------
+    index: integer -1
+        Not used in this implementation.
+    """
+    structure = read_fleur_xml(fileobj)
+
+    if isinstance(fileobj, io.IOBase):
+        fileobj.seek(0)
+    xmltree, schema_dict = load_outxml(fileobj)
+    kpoints, weights, cell, pbc = get_kpoints_data(xmltree, schema_dict, only_used=True, convert_to_angstroem=False)
+
+    parser_warnings = {}
+    results = outxml_parser(xmltree, parser_info_out=parser_warnings)
+
+    results_dict = {
+        "efermi": results["fermi_energy"],
+        "energy": results["energy"],
+    }
+
+    calc = SinglePointDFTCalculator(structure, **results_dict)
+    structure.calc = calc
+    return structure
 
 
 @writer
