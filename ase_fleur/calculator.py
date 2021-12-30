@@ -91,7 +91,7 @@ class FleurTemplate(CalculatorTemplate):
         Create Fleur inp.xml file from atoms object by calling the
         Fleur inpgen
 
-        :param directory: ath to the calculation directory
+        :param directory: path to the calculation directory
         :param atoms: ase.Atoms object to use
         :param parameters: Dict with inpgen parameters
                            Changes to be done after the inpgen was run
@@ -117,13 +117,16 @@ class FleurTemplate(CalculatorTemplate):
         # 2. Run inpgen
         self.execute_inpgen(directory, self.inpgen_profile, inputfile)
 
-        # 3. ggf. make modifications using the FleurXMLmodifier
+        # 3. Modify inp.xml according to set parameters
+        fm = FleurXMLModifier()
+        fm.set_inpchanges({"itmax": self.iter_per_run})
+
+        # 4. ggf. make custom modifications using the FleurXMLmodifier
         if inp_changes:
-            fm = FleurXMLModifier()
-            fm.set_inpchanges({"itmax": self.iter_per_run})
             fm.add_task_list(inp_changes)
-            xmltree, _ = fm.modify_xmlfile(directory / "inp.xml")
-            xmltree.write(directory / "inp.xml", encoding="utf-8", pretty_print=True)
+
+        xmltree, _ = fm.modify_xmlfile(directory / "inp.xml")
+        xmltree.write(directory / "inp.xml", encoding="utf-8", pretty_print=True)
 
     def execute(self, directory, profile) -> None:
         """
@@ -157,10 +160,12 @@ class FleurTemplate(CalculatorTemplate):
         """
         fleur_results = outxml_parser(directory / self.output_file)
 
-        if "overall_density_convergence" in fleur_results:
-            distance = fleur_results["overall_density_convergence"]
-        else:
-            distance = fleur_results.get("density_convergence")
+        MAGNETIC_DISTANCE_KEY = "overall_density_convergence"
+        DISTANCE_KEY = "density_convergence"
+
+        distance = fleur_results.get(MAGNETIC_DISTANCE_KEY, fleur_results.get(DISTANCE_KEY))
+        if distance is None:
+            raise ValueError("Could not find charge density distance in output file")
 
         return distance < self.distance_converged
 
