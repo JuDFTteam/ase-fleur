@@ -1,3 +1,89 @@
+[build-system]
+requires = ["flit_core >=3.4,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "ase-fleur"
+dynamic = ["version"]  # read from masci_tools/__init__.py
+description = "Package adding IO/calculator functionalities for the FLEUR code to the ase package."
+authors = [{name = "The JuDFT team", email = "he.janssen@fz-juelich.de"}]
+readme = "README.md"
+license = {file = "LICENSE"}
+classifiers = [
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+        "Topic :: Scientific/Engineering :: Information Analysis",
+        "Topic :: Scientific/Engineering :: Physics",
+        "Topic :: Scientific/Engineering :: Chemistry",
+    ]
+
+keywords = ['ase', 'fleur']
+requires-python = ">=3.7"
+dependencies = [
+            'ase',
+            'masci_tools>=0.5.0',
+        ]
+
+[project.optional-dependencies]
+pre-commit = [
+    'pre-commit>=2.6.0',
+    'pylint~=2.11.1',
+    ]
+testing = [
+    'pytest~=6.0',
+    ]
+
+[project.urls]
+Home = "https://github.com/JuDFTteam/ase-fleur"
+Source = "https://github.com/JuDFTteam/ase-fleur"
+
+[project.entry_points."ase.ioformats"]
+"fleur-inpgen" = "ase_fleur.io:inpgen_format"
+"fleur-outxml" = "ase_fleur.io:outxml_format"
+"fleur-xml" = "ase_fleur.io:xml_format"
+
+[project.entry_points."ase.calculator"]
+"fleur" = "ase_fleur.calculator:Fleur"
+
+[tool.flit.module]
+name = "ase_fleur"
+
+[tool.pytest.ini_options]
+addopts = "--durations=30 --quiet"
+
+[tool.pydocstyle]
+ignore = ["D105","D2","D4"]
+match-dir="(?!(tests)).*"
+
+[tool.mypy]
+ignore_missing_imports = true
+
+[tool.coverage.run]
+omit = [
+  "*tests*"
+]
+relative_files = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "@deprecated",
+]
+
 [tool.black]
 line-length = 120
 target-version = ['py38']
@@ -19,3 +105,72 @@ exclude = '''
   )/
 )
 '''
+
+[tool.pylint.basic]
+good-names = [
+    "_",
+    "x",
+    "y",
+    "z",
+    "i",
+    "j",
+    "k",
+]
+no-docstring-rgx = "^_"
+docstring-min-length = 5
+
+[tool.pylint.classes]
+exclude-protected = [
+    "_asdict",
+    "_fields",
+    "_replace",
+    "_source",
+    "_make",
+    "_Element",
+    "_ElementTree",
+    "_pprint_dict",
+    "_pprint_set",
+    "_dispatch"
+    ]
+
+[tool.pylint.design]
+max-locals = 20
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.pylint.messages_control]
+disable = [
+    "too-few-public-methods",
+    "too-many-public-methods",
+    "bad-continuation",
+    "wrong-import-position",
+    "line-too-long",
+    "locally-disabled",
+    "wildcard-import",
+    "locally-enabled",
+    "too-many-instance-attributes",
+    "fixme",
+    "len-as-condition",
+    "wrong-import-order",
+    "import-outside-toplevel",
+    "duplicate-code",
+    "unnecessary-pass",
+    "invalid-name",
+    "unused-variable",
+    "unused-argument",
+    "unused-import",
+    "missing-function-docstring",
+    "too-many-locals",
+    "too-many-branches",
+    "no-self-use",
+    "c-extension-no-member",
+    "too-many-statements",
+    "too-many-nested-blocks",
+    "too-many-lines",
+    "too-many-return-statements",
+    "too-many-arguments",
+    "pointless-string-statement",
+    "no-member",
+    "consider-using-f-string"
+]
