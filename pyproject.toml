@@ -27,7 +27,7 @@ classifiers = [
 keywords = ['ase', 'fleur']
 requires-python = ">=3.7"
 dependencies = [
-            'ase',
+            'ase>=3.23.0b1',
             'masci_tools>=0.5.0',
         ]
 
