@@ -46,7 +46,11 @@ def test_read_fleur_outxml():
     assert atoms.cell[:] == pytest.approx(
         np.array([[0.0, 5.13060853, 5.13060853], [5.13060853, 0.0, 5.13060853], [5.13060853, 5.13060853, 0.0]])
     )
+
     assert dict(atoms.calc.properties()) == {
+        "free_energy": pytest.approx(-15784.360931872383),
+        "natoms": 2,
+        "charges": pytest.approx(np.array([12.2309952, 12.2309952])),
         "fermi_level": pytest.approx(0.1848170588),
         "energy": pytest.approx(-15784.360931872383),
     }

@@ -12,15 +12,20 @@ The package masci-tools (version 0.4.11 or greater) is required by this module:
 """
 import io
 
+import numpy as np
+
 from ase.atoms import Atoms
 from ase.calculators.singlepoint import SinglePointDFTCalculator
 from ase.utils import writer
 from ase.utils.plugins import ExternalIOFormat
 
-
 from masci_tools.io.fleur_inpgen import write_inpgen_file, read_inpgen_file
 from masci_tools.io.io_fleurxml import load_inpxml, load_outxml
+from masci_tools.io.common_functions import convert_to_pystd
+from masci_tools.util.parse_tasks_decorators import conversion_function
+from masci_tools.util.constants import HTR_TO_EV
 from masci_tools.util.xml.xml_getters import get_structure_data, get_kpoints_data
+from masci_tools.util.schema_dict_util import eval_simple_xpath, get_number_of_nodes
 from masci_tools.io.parsers.fleur import outxml_parser
 
 
@@ -94,6 +99,125 @@ def read_fleur_xml(fileobj, index=-1):
     return Atoms(symbols=symbols, positions=positions, pbc=pbc, cell=cell)
 
 
+OUTXML_ADDITIONAL_TASKS = {
+    "total_energy_ase": {
+        "_minimal": True,
+        "_conversions": ["convert_total_energy_ase"],
+        "total_energy": {"parse_type": "attrib", "path_spec": {"name": "value", "tag_name": "totalEnergy"}},
+    },
+    "atom_charges": {
+        "_conversions": ["calculate_total_charge_atoms"],
+        "parsed_atom_charges": {
+            "parse_type": "attrib",
+            "path_spec": {"name": "total", "tag_name": "mtCharge", "contains": "valence"},
+        },
+        "parsed_corestates": {
+            "parse_type": "allAttribs",
+            "path_spec": {"name": "coreStates"},
+            "subtags": True,
+            "flat": False,
+        },
+    },
+}
+MAGMOMS_KEY = "magnetic_moments"
+MAGMOM_KEY = "total_magnetic_moment_cell"
+FORCES_KEY = "force_atoms"
+
+
+# TODO: Replace with more general solution passing arguments to conversion functions
+#      maybe use the same mechanism as in HDF5Reader for transformations with NamedTuple
+@conversion_function
+def convert_total_energy_ase(out_dict, logger):
+    """
+    Convert total energy to eV
+    """
+
+    total_energy = out_dict.get("total_energy", None)
+
+    if total_energy is None:
+        if "total_energy" in out_dict:
+            if logger is not None:
+                logger.warning("convert_total_energy cannot convert None to eV")
+            out_dict["total_energy_ev"] = None
+            out_dict["total_energy_units"] = "eV"
+        return out_dict
+
+    total_energy = total_energy[-1]
+
+    if "total_energy_ev" not in out_dict:
+        out_dict["total_energy_ev"] = []
+        out_dict["total_energy_units"] = "eV"
+
+    if total_energy is not None:
+        out_dict["total_energy_ev"].append(total_energy * HTR_TO_EV)
+    else:
+        if logger is not None:
+            logger.warning("convert_total_energy_ase cannot convert None to eV")
+        out_dict["total_energy_ev"].append(None)
+
+    return out_dict
+
+
+@conversion_function
+def calculate_total_charge_atoms(out_dict, logger):
+    """
+    Calculate the the total charge per atom
+
+    :param out_dict: dict with the already parsed information
+    """
+    mt_charges = out_dict.pop("parsed_atom_charges", None)
+    if mt_charges is None:
+        if logger is not None:
+            logger.warning("calculate_total_charge_atoms got None for Muffin-tin charges")
+        return out_dict
+
+    corestates = out_dict.pop("parsed_corestates", None)
+    if corestates is None:
+        if logger is not None:
+            logger.warning("calculate_total_charge_atoms got None for corestates")
+        return out_dict
+
+    spins = max(corestates["spin"]) if isinstance(corestates["spin"], list) else corestates["spin"]
+
+    # 1. Calculate the core charges per atomtype
+    if not isinstance(corestates["state"], list):
+        corestates["state"] = [corestates["state"]]
+    if spins == 2:
+        corestates["state"] = corestates["state"][: len(corestates["state"]) // 2]
+
+    corecharges = []
+    for states in corestates["state"]:
+        weights = states["weight"]
+        if isinstance(weights, list):
+            weights = sum(weights)
+        corecharges.append(weights)
+    corecharges = np.array(corecharges)
+
+    # 2. Calculate the mt charges
+    mt_charges = mt_charges[0]
+    if not isinstance(mt_charges, list):
+        mt_charges = [mt_charges]
+
+    if spins == 2 and len(mt_charges) % 2 != 0:
+        if logger is not None:
+            logger.warning("calculate_total_charge_atoms got spins=2 and odd number of mt charges")
+        else:
+            raise ValueError("calculate_total_charge_atoms got spins=2 and odd number of mt charges")
+        return out_dict
+
+    if spins == 2:
+        mt_charges = [
+            charge_up + charge_dn
+            for charge_up, charge_dn in zip(mt_charges[: len(mt_charges) // 2], mt_charges[len(mt_charges) // 2 :])
+        ]
+    mt_charges = np.array(mt_charges)
+
+    atom_charges = convert_to_pystd(mt_charges + corecharges)
+    out_dict.setdefault("atom_charges", []).append(atom_charges)
+
+    return out_dict
+
+
 def read_fleur_outxml(fileobj, index=-1):
     """Reads structure and results from fleur out.xml file.
 
@@ -115,12 +239,38 @@ def read_fleur_outxml(fileobj, index=-1):
     kpoints, weights, cell, pbc = get_kpoints_data(xmltree, schema_dict, only_used=True, convert_to_angstroem=False)
 
     parser_warnings = {}
-    results = outxml_parser(xmltree, parser_info_out=parser_warnings)
+    results = outxml_parser(xmltree, parser_info_out=parser_warnings, additional_tasks=OUTXML_ADDITIONAL_TASKS)
+
+    # The outxml_parser can only easily supply the charges per atom type for now
+    # so we need to blow this up to per atom
+    equivalent_atoms = []
+    atom_groups = eval_simple_xpath(xmltree, schema_dict, "atomGroup", list_return=True)
+    for group in atom_groups:
+        if results["fleur_modes"]["film"]:
+            equivalent_atoms.append(get_number_of_nodes(group, schema_dict, "filmpos"))
+        else:
+            equivalent_atoms.append(get_number_of_nodes(group, schema_dict, "relpos"))
+
+    atomtype_charges = results.get("atom_charges")
+    atom_charges = []
+    if atomtype_charges:
+        for charge, n_equiv in zip(atomtype_charges, equivalent_atoms):
+            atom_charges.extend([charge] * n_equiv)
+    atom_charges = np.array(atom_charges)
 
     results_dict = {
-        "efermi": results["fermi_energy"],
-        "energy": results["energy"],
+        "efermi": results.get("fermi_energy"),
+        "free_energy": results.get("energy"),
+        "energy": results.get("total_energy_ev"),
+        "charges": atom_charges,
     }
+
+    if MAGMOM_KEY in results:
+        results_dict["magmoms"] = np.array(results[MAGMOMS_KEY])
+        results_dict["magmom"] = results[MAGMOM_KEY]
+
+    if FORCES_KEY in results:
+        results_dict["forces"] = np.array([force for _, force in results[FORCES_KEY]])
 
     calc = SinglePointDFTCalculator(structure, **results_dict)
     structure.calc = calc

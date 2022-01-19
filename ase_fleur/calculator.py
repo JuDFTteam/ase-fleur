@@ -34,7 +34,7 @@ class FleurProfile:
         import tempfile
 
         with tempfile.TemporaryDirectory() as td:
-            with open(Path(td) / "err", "w") as err:
+            with open(Path(td) / "err", "w", encoding="utf8") as err:
                 out = check_output(self.argv + ["-info"], stderr=err, cwd=td).decode("utf-8")
         m = re.findall(r"^(.*)\(www\.max\-centre\.eu\)", out, flags=re.MULTILINE)
         if not m:
@@ -51,8 +51,8 @@ class FleurProfile:
         """
         from subprocess import check_call
 
-        with open(outputfile, "w") as fd:
-            with open(error_file, "w") as ferr:
+        with open(outputfile, "w", encoding="utf8") as fd:
+            with open(error_file, "w", encoding="utf8") as ferr:
                 check_call(self.argv, stdout=fd, stderr=ferr, cwd=directory)
 
     def run_inpgen(self, directory, inputfile, outputfile, error_file):
@@ -66,8 +66,8 @@ class FleurProfile:
         """
         from subprocess import check_call
 
-        with open(outputfile, "w") as fd:
-            with open(error_file, "w") as ferr:
+        with open(outputfile, "w", encoding="utf8") as fd:
+            with open(error_file, "w", encoding="utf8") as ferr:
                 check_call(self.inpgen_argv + ["-f", str(inputfile)], stdout=fd, stderr=ferr, cwd=directory)
 
 
@@ -77,7 +77,10 @@ class FleurTemplate(CalculatorTemplate):
     """
 
     def __init__(self, *, inpgen_profile):
-        super().__init__(name="fleur", implemented_properties=("energy"))
+        super().__init__(
+            name="fleur",
+            implemented_properties=("energy", "forces", "magmom", "magmoms", "efermi", "free_energy", "charges"),
+        )
         self.stdout_file = "fleur.log"
         self.error_file = "error.log"
         self.output_file = "out.xml"
