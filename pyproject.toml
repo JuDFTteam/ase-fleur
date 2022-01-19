@@ -44,12 +44,12 @@ testing = [
 Home = "https://github.com/JuDFTteam/ase-fleur"
 Source = "https://github.com/JuDFTteam/ase-fleur"
 
-[project.entry_points."ase.ioformats"]
+[project.entry-points."ase.ioformats"]
 "fleur-inpgen" = "ase_fleur.io:inpgen_format"
 "fleur-outxml" = "ase_fleur.io:outxml_format"
 "fleur-xml" = "ase_fleur.io:xml_format"
 
-[project.entry_points."ase.calculator"]
+[project.entry-points."ase.calculator"]
 "fleur" = "ase_fleur.calculator:Fleur"
 
 [tool.flit.module]
