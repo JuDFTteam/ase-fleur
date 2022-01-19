@@ -22,7 +22,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install git+https://gitlab.com/ase/ase.git@master
-        pip install -e .[pre-commit]
+        pip install -e .[pre-commit,testing]
     - name: Run pre-commit
       run: |
         pre-commit run --all-files || (git status --short; git diff ; exit 1)
