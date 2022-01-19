@@ -53,7 +53,7 @@ jobs:
     - name: pytest
       run: |
         pytest tests/
-  
+
   publish:
     name: Publish to PyPi
     needs: [tests, linting]
