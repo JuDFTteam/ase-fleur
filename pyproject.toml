@@ -38,6 +38,7 @@ pre-commit = [
     ]
 testing = [
     'pytest~=6.0',
+    'pytest-cov~=3.0',
     ]
 
 [project.urls]
@@ -56,7 +57,11 @@ Source = "https://github.com/JuDFTteam/ase-fleur"
 name = "ase_fleur"
 
 [tool.pytest.ini_options]
-addopts = "--durations=30 --quiet"
+minversion = "6.0"
+addopts = "--durations=30 --quiet --cov=ase_fleur --cov=tests --cov-report xml"
+testpaths = [
+  "tests"
+]
 
 [tool.pydocstyle]
 ignore = ["D105","D2","D4"]
@@ -64,25 +69,6 @@ match-dir="(?!(tests)).*"
 
 [tool.mypy]
 ignore_missing_imports = true
-
-[tool.coverage.run]
-omit = [
-  "*tests*"
-]
-relative_files = true
-
-[tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
-    "if self.debug:",
-    "if settings.DEBUG",
-    "raise AssertionError",
-    "raise NotImplementedError",
-    "if 0:",
-    "if __name__ == .__main__.:",
-    "@deprecated",
-]
 
 [tool.black]
 line-length = 120

@@ -52,7 +52,11 @@ jobs:
         pip install -e .[testing]
     - name: pytest
       run: |
-        pytest tests/
+        pytest
+    - name: Upload code coverage report
+      run: |
+        pip install codecov
+        codecov
 
   publish:
     name: Publish to PyPi
