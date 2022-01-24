@@ -1,4 +1,4 @@
-[![MIT license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.txt)
+[![MIT license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![GitHub version](https://img.shields.io/github/v/tag/JuDFTTeam/ase-fleur?include_prereleases&label=GitHub%20version&logo=GitHub)](https://github.com/JuDFTteam/ase-fleur/releases)
 [![PyPI version](https://img.shields.io/pypi/v/ase-fleur)](https://pypi.org/project/ase-fleur/)
 [![PyPI pyversion](https://img.shields.io/pypi/pyversions/ase-fleur)](https://pypi.org/project/ase-fleur/)
