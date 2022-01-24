@@ -1,5 +1,13 @@
+[![MIT license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.txt)
+[![GitHub version](https://img.shields.io/github/v/tag/JuDFTTeam/ase-fleur?include_prereleases&label=GitHub%20version&logo=GitHub)](https://github.com/JuDFTteam/ase-fleur/releases)
+[![PyPI version](https://img.shields.io/pypi/v/ase-fleur)](https://pypi.org/project/ase-fleur/)
+[![PyPI pyversion](https://img.shields.io/pypi/pyversions/ase-fleur)](https://pypi.org/project/ase-fleur/)
+[![Build status](https://github.com/JuDFTteam/ase-fleur/workflows/ase-fleur/badge.svg?branch=develop&event=push)](https://github.com/JuDFTteam/ase-fleur/actions)
+[![Coverage Status](https://codecov.io/gh/JuDFTteam/ase-fleur/branch/develop/graph/badge.svg)](https://codecov.io/gh/JuDFTteam/ase-fleur)
+
 # ase-fleur
 Package adding IO/calculator functionalities for the [FLEUR code](https://www.flapw.de) to the [ase](https://www.pypi.org/project/ase) package.
+Uses the general IO package [masci-tools](https://pypi.org/project/ase-fleur/) for reading and writing Fleur input/output files.
 
 ## IO functionality
 
