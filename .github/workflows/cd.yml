@@ -48,7 +48,6 @@ jobs:
     - name: Install dependencies
       run: |
         pip install git+https://gitlab.com/ase/ase.git@master
-        pip install git+https://github.com/JuDFTteam/masci-tools.git@develop
         pip install -e .[testing]
     - name: pytest
       run: |
