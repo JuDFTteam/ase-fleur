@@ -23,9 +23,9 @@ from masci_tools.io.fleur_inpgen import write_inpgen_file, read_inpgen_file
 from masci_tools.io.io_fleurxml import load_inpxml, load_outxml
 from masci_tools.io.common_functions import convert_to_pystd
 from masci_tools.util.parse_tasks_decorators import conversion_function
-from masci_tools.util.constants import HTR_TO_EV
 from masci_tools.util.xml.xml_getters import get_structure_data, get_kpoints_data
 from masci_tools.util.schema_dict_util import eval_simple_xpath, get_number_of_nodes
+from masci_tools.util.parse_utils import Conversion
 from masci_tools.io.parsers.fleur import outxml_parser
 
 
@@ -102,7 +102,15 @@ def read_fleur_xml(fileobj, index=-1):
 OUTXML_ADDITIONAL_TASKS = {
     "total_energy_ase": {
         "_minimal": True,
-        "_conversions": ["convert_total_energy_ase"],
+        "_conversions": [
+            Conversion(
+                name="convert_htr_to_ev",
+                kwargs={
+                    "name": "total_energy",
+                    "converted_name": "total_energy_ev",
+                },
+            )
+        ],
         "total_energy": {"parse_type": "attrib", "path_spec": {"name": "value", "tag_name": "totalEnergy"}},
     },
     "atom_charges": {
@@ -114,7 +122,9 @@ OUTXML_ADDITIONAL_TASKS = {
         "parsed_corestates": {
             "parse_type": "allAttribs",
             "path_spec": {"name": "coreStates"},
-            "subtags": True,
+            "kwargs": {
+                "subtags": True,
+            },
             "flat": False,
         },
     },
@@ -122,40 +132,6 @@ OUTXML_ADDITIONAL_TASKS = {
 MAGMOMS_KEY = "magnetic_moments"
 MAGMOM_KEY = "total_magnetic_moment_cell"
 FORCES_KEY = "force_atoms"
-
-
-# TODO: Replace with more general solution passing arguments to conversion functions
-#      maybe use the same mechanism as in HDF5Reader for transformations with NamedTuple
-@conversion_function
-def convert_total_energy_ase(out_dict, logger):
-    """
-    Convert total energy to eV
-    """
-
-    total_energy = out_dict.get("total_energy", None)
-
-    if total_energy is None:
-        if "total_energy" in out_dict:
-            if logger is not None:
-                logger.warning("convert_total_energy cannot convert None to eV")
-            out_dict["total_energy_ev"] = None
-            out_dict["total_energy_units"] = "eV"
-        return out_dict
-
-    total_energy = total_energy[-1]
-
-    if "total_energy_ev" not in out_dict:
-        out_dict["total_energy_ev"] = []
-        out_dict["total_energy_units"] = "eV"
-
-    if total_energy is not None:
-        out_dict["total_energy_ev"].append(total_energy * HTR_TO_EV)
-    else:
-        if logger is not None:
-            logger.warning("convert_total_energy_ase cannot convert None to eV")
-        out_dict["total_energy_ev"].append(None)
-
-    return out_dict
 
 
 @conversion_function
