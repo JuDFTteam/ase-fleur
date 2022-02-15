@@ -114,7 +114,7 @@ OUTXML_ADDITIONAL_TASKS = {
         "total_energy": {"parse_type": "attrib", "path_spec": {"name": "value", "tag_name": "totalEnergy"}},
     },
     "atom_charges": {
-        "_conversions": ["calculate_total_charge_atoms"],
+        "_conversions": [Conversion(name="calculate_total_charge_atoms")],
         "parsed_atom_charges": {
             "parse_type": "attrib",
             "path_spec": {"name": "total", "tag_name": "mtCharge", "contains": "valence"},
