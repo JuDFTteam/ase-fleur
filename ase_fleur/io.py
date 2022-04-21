@@ -20,13 +20,12 @@ from ase.utils import writer
 from ase.utils.plugins import ExternalIOFormat
 
 from masci_tools.io.fleur_inpgen import write_inpgen_file, read_inpgen_file
-from masci_tools.io.io_fleurxml import load_inpxml, load_outxml
+from masci_tools.io.fleur_xml import load_inpxml, load_outxml
 from masci_tools.io.common_functions import convert_to_pystd
-from masci_tools.util.parse_tasks_decorators import conversion_function
 from masci_tools.util.xml.xml_getters import get_structure_data, get_kpoints_data
 from masci_tools.util.schema_dict_util import eval_simple_xpath, get_number_of_nodes
 from masci_tools.util.parse_utils import Conversion
-from masci_tools.io.parsers.fleur import outxml_parser
+from masci_tools.io.parsers.fleur import outxml_parser, conversion_function
 
 
 inpgen_format = ExternalIOFormat(
@@ -93,7 +92,7 @@ def read_fleur_xml(fileobj, index=-1):
             fileobj.seek(0)
         xmltree, schema_dict = load_inpxml(fileobj)
 
-    atoms, cell, pbc = get_structure_data(xmltree, schema_dict, site_namedtuple=True, convert_to_angstroem=False)
+    atoms, cell, pbc = get_structure_data(xmltree, schema_dict, convert_to_angstroem=False)
     positions, symbols, _ = zip(*atoms)
 
     return Atoms(symbols=symbols, positions=positions, pbc=pbc, cell=cell)
