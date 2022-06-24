@@ -25,26 +25,28 @@ def test_fleur_inpgen_input_roundtrip(tmp_path):
 def test_read_fleur_xml():
     atoms = read(TEST_FILES_DIR / "inp.xml")
 
+    param = 2.715
     assert all(atoms.symbols == "Si")
     assert atoms.positions == pytest.approx(
-        np.array([[1.28265213, 1.28265213, 1.28265213], [-1.28265213, -1.28265213, -1.28265213]])
+        np.array([[param/4, param/4, param/4], [-param/4, -param/4, -param/4]])
     )
     assert all(atoms.pbc)
     assert atoms.cell[:] == pytest.approx(
-        np.array([[0.0, 5.13060853, 5.13060853], [5.13060853, 0.0, 5.13060853], [5.13060853, 5.13060853, 0.0]])
+        np.array([[0.0, param, param], [param, 0.0, param], [param, param, 0.0]])
     )
 
 
 def test_read_fleur_outxml():
     atoms = read(TEST_FILES_DIR / "out.xml")
 
+    param = 2.715
     assert all(atoms.symbols == "Si")
     assert atoms.positions == pytest.approx(
-        np.array([[1.28265213, 1.28265213, 1.28265213], [-1.28265213, -1.28265213, -1.28265213]])
+        np.array([[param/4, param/4, param/4], [-param/4, -param/4, -param/4]])
     )
     assert all(atoms.pbc)
     assert atoms.cell[:] == pytest.approx(
-        np.array([[0.0, 5.13060853, 5.13060853], [5.13060853, 0.0, 5.13060853], [5.13060853, 5.13060853, 0.0]])
+        np.array([[0.0, param, param], [param, 0.0, param], [param, param, 0.0]])
     )
 
     assert dict(atoms.calc.properties()) == {
