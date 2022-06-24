@@ -3,13 +3,12 @@
 Test configuration
 """
 from ase_fleur.calculator import FleurProfile, Fleur
-from ase.test.factories import factory
-from ase.test.factories import Factories
+from ase.test.factories import factory as factory_dec, Factories, CalculatorInputs
 
 import pytest
 
 
-@factory("fleur")
+@factory_dec("fleur")
 class FleurFactory:
     """
     Factory for use in ase tests of the Calculator class
@@ -73,3 +72,14 @@ def generate_factories(pytestconfig):
     if pytestconfig.getoption("--calculator"):
         return Factories(["fleur"])
     return None
+
+
+@pytest.fixture(name="factory")
+def factory_fixture(request, factories):
+    name, kwargs = request.param
+    if not factories.installed(name):
+        pytest.skip(f"Not installed: {name}")
+    if not factories.enabled(name):
+        pytest.skip(f"Not enabled: {name}")
+    factory = factories[name]
+    return CalculatorInputs(factory, kwargs)
