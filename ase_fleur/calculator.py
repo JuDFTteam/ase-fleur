@@ -155,6 +155,10 @@ class FleurTemplate(CalculatorTemplate):
         :param inputfile: Path to the inputfile to use
         """
         profile.run_inpgen(directory, inputfile, self.stdout_file, self.error_file)
+        with open(directory / inputfile) as file:
+            print(file.read())
+        with open(directory / "inp.xml") as file:
+            print(file.read())
 
     def check_convergence(self, directory):
         """
