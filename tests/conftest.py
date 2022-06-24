@@ -4,8 +4,10 @@ Test configuration
 """
 from ase_fleur.calculator import FleurProfile, Fleur
 from ase.test.factories import factory as factory_dec, Factories, CalculatorInputs
+from ase.utils import workdir
 
 import pytest
+from pathlib import Path
 
 
 @factory_dec("fleur")
@@ -83,3 +85,28 @@ def factory_fixture(request, factories):
         pytest.skip(f"Not enabled: {name}")
     factory = factories[name]
     return CalculatorInputs(factory, kwargs)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def sessionlevel_testing_path():
+    # We cd into a tempdir so tests and fixtures won't create files
+    # elsewhere (e.g. in the unsuspecting user's directory).
+    #
+    # However we regard it as an error if the tests leave files there,
+    # because they can access each others' files and hence are not
+    # independent.  Therefore we want them to explicitly use the
+    # "testdir" fixture which ensures that each has a clean directory.
+    #
+    # To prevent tests from writing files, we chmod the directory.
+    # But if the tests are killed, we cannot clean it up and it will
+    # disturb other pytest runs if we use the pytest tempdir factory.
+    #
+    # So we use the tempfile module for this temporary directory.
+    import tempfile
+
+    with tempfile.TemporaryDirectory(prefix="ase-test-workdir-") as tempdir:
+        path = Path(tempdir)
+        path.chmod(0o555)
+        with workdir(path):
+            yield path
+        path.chmod(0o755)
