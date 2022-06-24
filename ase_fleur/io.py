@@ -66,7 +66,7 @@ def read_fleur_inpgen(fileobj, index=-1):
     """
 
     # Last parameter is lapw parameters and is not used here
-    cell, atoms, pbc, _ = read_inpgen_file(fileobj, convert_to_angstroem=False)
+    cell, atoms, pbc, _ = read_inpgen_file(fileobj)
     positions, symbols, _ = zip(*atoms)
 
     return Atoms(symbols=symbols, positions=positions, pbc=pbc, cell=cell)
@@ -92,7 +92,7 @@ def read_fleur_xml(fileobj, index=-1):
             fileobj.seek(0)
         xmltree, schema_dict = load_inpxml(fileobj)
 
-    atoms, cell, pbc = get_structure_data(xmltree, schema_dict, convert_to_angstroem=False)
+    atoms, cell, pbc = get_structure_data(xmltree, schema_dict)
     positions, symbols, _ = zip(*atoms)
 
     return Atoms(symbols=symbols, positions=positions, pbc=pbc, cell=cell)
@@ -275,6 +275,5 @@ def write_fleur_inpgen(fileobj, atoms, parameters=None, **kwargs):
         pbc=atoms.pbc,
         input_params=parameters,
         file=fileobj,
-        convert_from_angstroem=False,
         **kwargs,
     )
