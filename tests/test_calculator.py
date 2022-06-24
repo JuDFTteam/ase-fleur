@@ -5,7 +5,6 @@ Tests of the fleur calculator class
 from ase_fleur.calculator import FleurProfile, Fleur
 from ase.test.factories import factory
 from ase.build import bulk
-import shutil
 import pytest
 
 
@@ -41,7 +40,7 @@ def verify(calc):
     assert calc.get_k_point_weights() is not None
 
 
-@pytest.mark.skipif(shutil.which("fleur") is None, reason="Fleur executable not found")
+@pytest.mark.calculator
 def test_main(fleur_factory):
     """
     Basic test of Fleur calculator

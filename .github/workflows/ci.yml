@@ -90,6 +90,8 @@ jobs:
 
       - name: pytest
         run: |
+          mkdir -p ~/.config/ase
+          cp test-files/ase_test.conf ~/.config/ase/ase.conf
           pytest
       - name: Upload code coverage report
         run: |
