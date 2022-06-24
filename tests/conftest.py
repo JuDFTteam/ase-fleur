@@ -87,7 +87,7 @@ def factory_fixture(request, factories):
     return CalculatorInputs(factory, kwargs)
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="function", autouse=True)
 def sessionlevel_testing_path():
     # We cd into a tempdir so tests and fixtures won't create files
     # elsewhere (e.g. in the unsuspecting user's directory).
@@ -104,9 +104,7 @@ def sessionlevel_testing_path():
     # So we use the tempfile module for this temporary directory.
     import tempfile
 
-    with tempfile.TemporaryDirectory(prefix="ase-test-workdir-") as tempdir:
+    with tempfile.TemporaryDirectory() as tempdir:
         path = Path(tempdir)
-        path.chmod(0o555)
         with workdir(path):
             yield path
-        path.chmod(0o755)
