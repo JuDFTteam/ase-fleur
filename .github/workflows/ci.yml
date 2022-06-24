@@ -87,6 +87,8 @@ jobs:
       - name: Install Fleur code from conda
         run: |
           conda install fleur
+          fleur_MPI -h
+          inpgen -h
 
       - name: pytest
         run: |
