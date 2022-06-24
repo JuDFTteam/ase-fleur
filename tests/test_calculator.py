@@ -5,6 +5,7 @@ Tests of the fleur calculator class
 from ase.build import bulk
 import pytest
 
+
 def verify(calc):
     assert calc.get_fermi_level() is not None
     assert calc.get_ibz_k_points() is not None
@@ -13,7 +14,7 @@ def verify(calc):
     assert calc.get_k_point_weights() is not None
 
 
-@pytest.mark.calculator('fleur')
+@pytest.mark.calculator("fleur")
 def test_main(factory):
     """
     Basic test of Fleur calculator

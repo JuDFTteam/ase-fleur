@@ -8,6 +8,7 @@ from ase.test.factories import Factories
 
 import pytest
 
+
 @factory("fleur")
 class FleurFactory:
     """
@@ -57,12 +58,15 @@ def pytest_collection_modifyitems(session, config, items):
 
         config.hook.pytest_deselected(items=items)
 
+
 def pytest_generate_tests(metafunc):
     """
     Parametrize calculator factories
     """
     from ase.test.factories import parametrize_calculator_tests
+
     parametrize_calculator_tests(metafunc)
+
 
 @pytest.fixture(scope="session")
 def generate_factories(pytestconfig):
