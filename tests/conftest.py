@@ -67,11 +67,11 @@ def pytest_generate_tests(metafunc):
     parametrize_calculator_tests(metafunc)
 
 
-@pytest.fixture(scope="session")
-def generate_factories(pytestconfig):
+@pytest.fixture(scope="session", name="factories")
+def factories_fixture(pytestconfig):
     if pytestconfig.getoption("--calculator"):
         return Factories(["fleur"])
-    return None
+    return Factories([])
 
 
 @pytest.fixture(name="factory")
