@@ -41,7 +41,7 @@ def verify(calc):
     assert calc.get_k_point_weights() is not None
 
 
-@pytest.mark.skipif(shutil.which("fleur") is None, "Fleur executable not found")
+@pytest.mark.skipif(shutil.which("fleur") is None, reason="Fleur executable not found")
 def test_main(fleur_factory):
     """
     Basic test of Fleur calculator
