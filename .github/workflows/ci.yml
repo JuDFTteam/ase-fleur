@@ -86,8 +86,8 @@ jobs:
 
       - name: Install Fleur code from conda
         run: |
+          conda install -c conda-forge openmpi=4.1.2
           conda install fleur
-          export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
           fleur_MPI -h
           inpgen -h
 
