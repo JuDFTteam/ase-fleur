@@ -155,10 +155,6 @@ class FleurTemplate(CalculatorTemplate):
         :param inputfile: Path to the inputfile to use
         """
         profile.run_inpgen(directory, inputfile, self.stdout_file, self.error_file)
-        with open(directory / inputfile) as file:
-            print(file.read())
-        with open(directory / "inp.xml") as file:
-            print(file.read())
 
     def check_convergence(self, directory):
         """
@@ -166,11 +162,6 @@ class FleurTemplate(CalculatorTemplate):
 
         :param directory: Path to the calculation directory
         """
-        print(os.listdir(directory))
-        with open(directory / self.stdout_file) as file:
-            print(file.read())
-        with open(directory / self.error_file) as file:
-            print(file.read())
         fleur_results = outxml_parser(directory / self.output_file)
 
         MAGNETIC_DISTANCE_KEY = "overall_density_convergence"

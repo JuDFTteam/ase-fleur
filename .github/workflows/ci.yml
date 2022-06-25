@@ -62,7 +62,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        python-version: ["3.7","3.8","3.9","3.10"]
+        python-version: ["3.8",]
+        fleur-version: ["6.0"]
 
     steps:
       - uses: actions/checkout@v2
@@ -81,13 +82,17 @@ jobs:
         uses: s-weigand/setup-conda@v1
         with:
           conda-channels: conda-forge
+          update-conda: true
+          python-version: ${{ matrix.python-version }}
 
-      - run: conda --version
+      - name: Install mamba
+        run: |
+          conda --version
+          conda install mamba
 
       - name: Install Fleur code from conda
         run: |
-          conda install -c conda-forge openmpi=4.1.2
-          conda install fleur
+          mamba install fleur=${{ matrix.fleur-version }}
           fleur_MPI -h
           inpgen -h
 
