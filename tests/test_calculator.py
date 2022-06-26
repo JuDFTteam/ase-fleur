@@ -23,3 +23,11 @@ def test_main(factory):
     atoms.calc = factory.calc()
     atoms.get_potential_energy()
     verify(atoms.calc)
+
+
+@pytest.mark.calculator("fleur")
+def test_version(factory):
+    """
+    Test of version parsing
+    """
+    assert factory.factory.version() == "6.0"

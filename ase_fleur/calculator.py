@@ -5,7 +5,6 @@ This module defines a calculator for the Fleur code starting from version v27
 from pathlib import Path
 import warnings
 import re
-import os
 
 from masci_tools.io.fleurxmlmodifier import FleurXMLModifier
 from masci_tools.io.parsers.fleur import outxml_parser
@@ -37,7 +36,7 @@ class FleurProfile:
         with tempfile.TemporaryDirectory() as td:
             with open(Path(td) / "err", "w", encoding="utf8") as err:
                 out = check_output(self.argv + ["-info"], stderr=err, cwd=td).decode("utf-8")
-        m = re.findall(r"^(.*)\(www\.max\-centre\.eu\)", out, flags=re.MULTILINE)
+        m = re.findall(r"^\s*MaX\-Release (.*)\(www\.max\-centre\.eu\)", out, flags=re.MULTILINE)
         if not m:
             raise ValueError(f"Could not retrieve version from output: {out}")
         return m[0].strip()
