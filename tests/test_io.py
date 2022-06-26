@@ -28,12 +28,10 @@ def test_read_fleur_xml():
     param = 2.715
     assert all(atoms.symbols == "Si")
     assert atoms.positions == pytest.approx(
-        np.array([[param/4, param/4, param/4], [-param/4, -param/4, -param/4]])
+        np.array([[param / 4, param / 4, param / 4], [-param / 4, -param / 4, -param / 4]])
     )
     assert all(atoms.pbc)
-    assert atoms.cell[:] == pytest.approx(
-        np.array([[0.0, param, param], [param, 0.0, param], [param, param, 0.0]])
-    )
+    assert atoms.cell[:] == pytest.approx(np.array([[0.0, param, param], [param, 0.0, param], [param, param, 0.0]]))
 
 
 def test_read_fleur_outxml():
@@ -42,12 +40,10 @@ def test_read_fleur_outxml():
     param = 2.715
     assert all(atoms.symbols == "Si")
     assert atoms.positions == pytest.approx(
-        np.array([[param/4, param/4, param/4], [-param/4, -param/4, -param/4]])
+        np.array([[param / 4, param / 4, param / 4], [-param / 4, -param / 4, -param / 4]])
     )
     assert all(atoms.pbc)
-    assert atoms.cell[:] == pytest.approx(
-        np.array([[0.0, param, param], [param, 0.0, param], [param, param, 0.0]])
-    )
+    assert atoms.cell[:] == pytest.approx(np.array([[0.0, param, param], [param, 0.0, param], [param, param, 0.0]]))
 
     assert dict(atoms.calc.properties()) == {
         "free_energy": pytest.approx(-15784.360931872383),
@@ -55,4 +51,59 @@ def test_read_fleur_outxml():
         "charges": pytest.approx(np.array([12.2309952, 12.2309952])),
         "fermi_level": pytest.approx(0.1848170588),
         "energy": pytest.approx(-15784.360931872383),
+        "ibz_kpoints": pytest.approx(np.array([[0.1530809, 0.1530809, 0.1530809], [0.4592427, 0.1530809, 0.1530809]])),
+        "kpoint_weights": pytest.approx(np.array([2 / 8, 6 / 8])),
+        "nkpts": 2,
+        "nbands": 19,
+        "nspins": 1,
+        "eigenvalues": pytest.approx(
+            np.array(
+                [
+                    [
+                        [
+                            -4.70104467,
+                            -4.70082255,
+                            -3.08535988,
+                            -3.08535988,
+                            -3.08532042,
+                            -3.08477431,
+                            -3.08471498,
+                            -3.08471498,
+                            -0.19766336,
+                            0.06831202,
+                            0.18481706,
+                            0.18481706,
+                            0.28734007,
+                            0.34124866,
+                            0.34124866,
+                            0.46788854,
+                            0.47699595,
+                            0.47699595,
+                            0.54370476,
+                        ],
+                        [
+                            -4.70098049,
+                            -4.70088247,
+                            -3.08541659,
+                            -3.08540615,
+                            -3.08517064,
+                            -3.08490304,
+                            -3.08466068,
+                            -3.08465487,
+                            -0.12710011,
+                            -0.02193719,
+                            0.08264381,
+                            0.13155591,
+                            0.26834718,
+                            0.37615645,
+                            0.42415907,
+                            0.43011481,
+                            0.58858562,
+                            0.60013418,
+                            0.65977508,
+                        ],
+                    ]
+                ]
+            )
+        ),
     }
