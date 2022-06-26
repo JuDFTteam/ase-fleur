@@ -15,7 +15,7 @@ import io
 import numpy as np
 
 from ase.atoms import Atoms
-from ase.calculators.singlepoint import SinglePointDFTCalculator
+from ase.calculators.singlepoint import SinglePointDFTCalculator, SinglePointKPoint
 from ase.utils import writer
 from ase.utils.plugins import ExternalIOFormat
 
@@ -23,7 +23,13 @@ from masci_tools.io.fleur_inpgen import write_inpgen_file, read_inpgen_file
 from masci_tools.io.fleur_xml import load_inpxml, load_outxml
 from masci_tools.io.common_functions import convert_to_pystd
 from masci_tools.util.xml.xml_getters import get_structure_data, get_kpoints_data
-from masci_tools.util.schema_dict_util import eval_simple_xpath, get_number_of_nodes
+from masci_tools.util.schema_dict_util import (
+    eval_simple_xpath,
+    get_number_of_nodes,
+    tag_exists,
+    evaluate_attribute,
+    evaluate_text,
+)
 from masci_tools.util.parse_utils import Conversion
 from masci_tools.io.parsers.fleur import outxml_parser, conversion_function
 
@@ -193,7 +199,7 @@ def calculate_total_charge_atoms(out_dict, logger):
     return out_dict
 
 
-def read_fleur_outxml(fileobj, index=-1):
+def read_fleur_outxml(fileobj, index=-1, read_eigenvalues=True):
     """Reads structure and results from fleur out.xml file.
 
     Parameters
@@ -212,6 +218,11 @@ def read_fleur_outxml(fileobj, index=-1):
         fileobj.seek(0)
     xmltree, schema_dict = load_outxml(fileobj)
     kpoints, weights, cell, pbc = get_kpoints_data(xmltree, schema_dict, only_used=True, convert_to_angstroem=False)
+
+    reciprocal_cell = np.linalg.inv(cell) * 2 * np.pi
+    kpoints_cartesian = np.array(kpoints) @ reciprocal_cell
+    weights = np.array(weights)
+    weights = weights / np.sum(weights)
 
     parser_warnings = {}
     results = outxml_parser(xmltree, parser_info_out=parser_warnings, additional_tasks=OUTXML_ADDITIONAL_TASKS)
@@ -238,6 +249,7 @@ def read_fleur_outxml(fileobj, index=-1):
         "free_energy": results.get("energy"),
         "energy": results.get("total_energy_ev"),
         "charges": atom_charges,
+        "ibzkpts": kpoints_cartesian,
     }
 
     if MAGMOM_KEY in results:
@@ -247,7 +259,27 @@ def read_fleur_outxml(fileobj, index=-1):
     if FORCES_KEY in results:
         results_dict["forces"] = np.array([force for _, force in results[FORCES_KEY]])
 
+    kpts = []
+    if read_eigenvalues and tag_exists(xmltree, schema_dict, "eigenvalues", iteration_path=True):
+        eigenvalues = eval_simple_xpath(
+            xmltree,
+            schema_dict,
+            "eigenvaluesAt",
+            list_return=True,
+            filters={"iteration": {"index": -1}},
+            iteration_path=True,
+        )
+        for eigval_tag in eigenvalues:
+            spin = evaluate_attribute(eigval_tag, schema_dict, "spin") - 1
+            ikpt = evaluate_attribute(eigval_tag, schema_dict, "ikpt")
+            kpt = kpoints_cartesian[ikpt - 1]
+            weight = weights[ikpt - 1]
+            eig = evaluate_text(eigval_tag, schema_dict, "eigenvaluesAt")
+            kpts.append(SinglePointKPoint(weight, spin, kpt, eps_n=eig))
+
     calc = SinglePointDFTCalculator(structure, **results_dict)
+    if kpts:
+        calc.kpts = kpts
     structure.calc = calc
     return structure
 
