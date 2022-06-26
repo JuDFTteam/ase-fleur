@@ -24,7 +24,7 @@ class FleurFactory:
         return FleurProfile([self.executable], [self.inpgen_executable])
 
     def version(self):
-        self._profile().version()
+        return self._profile().version()
 
     def calc(self, **kwargs):
         return Fleur(profile=self._profile(), **kwargs)
