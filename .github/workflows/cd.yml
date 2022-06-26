@@ -33,6 +33,7 @@ jobs:
 
     strategy:
       max-parallel: 20
+      fail-fast: false
       matrix:
         os: [ubuntu-latest]
         python-version: ["3.7","3.8","3.9","3.10"]
@@ -56,6 +57,57 @@ jobs:
       run: |
         pip install codecov
         codecov
+
+  calulator-test:
+    name: Test Fleur Calculator
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.8",]
+        fleur-version: ["6.0"]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          pip install git+https://gitlab.com/ase/ase.git@master
+          pip install -e .[testing]
+
+      - name: Setup Conda
+        uses: s-weigand/setup-conda@v1
+        with:
+          conda-channels: conda-forge
+          update-conda: true
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install mamba
+        run: |
+          conda --version
+          conda install mamba
+
+      - name: Install Fleur code from conda
+        run: |
+          mamba install fleur=${{ matrix.fleur-version }}
+          fleur_MPI -h
+          inpgen -h
+
+      - name: pytest
+        run: |
+          mkdir -p ~/.config/ase
+          cp test-files/ase_test.conf ~/.config/ase/ase.conf
+          pytest --calculator
+      - name: Upload code coverage report
+        run: |
+          pip install codecov
+          codecov
 
   publish:
     name: Publish to PyPi
