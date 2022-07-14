@@ -26,6 +26,17 @@ def test_main(factory):
 
 
 @pytest.mark.calculator("fleur")
+def test_force(factory):
+    """
+    Basic test of Fleur calculator
+    """
+    atoms = bulk("Si")
+    atoms.calc = factory.calc()
+    assert atoms.get_forces() == []
+    verify(atoms.calc)
+
+
+@pytest.mark.calculator("fleur")
 def test_version(factory):
     """
     Test of version parsing

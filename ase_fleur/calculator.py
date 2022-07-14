@@ -87,7 +87,8 @@ class FleurTemplate(CalculatorTemplate):
         self.inpgen_profile = inpgen_profile
         self.max_runs = 3
         self.iter_per_run = 30
-        self.distance_converged = 1e-6
+        self.density_converged = 1e-6
+        self.force_convergence = {"force_converged": 0.002, "qfix": 2, "forcealpha": 1.0, "forcemix": "straight"}
 
     def write_input(self, directory, atoms, parameters, properties):
         """
@@ -122,7 +123,18 @@ class FleurTemplate(CalculatorTemplate):
 
         # 3. Modify inp.xml according to set parameters
         fm = FleurXMLModifier()
-        fm.set_inpchanges({"itmax": self.iter_per_run})
+        fm.set_inpchanges({"itmax": self.iter_per_run, "mindistance": self.density_converged})
+
+        if "forces" in properties:
+            fm.set_inpchanges(
+                {
+                    "force_converged": self.force_convergence["force_converged"],
+                    "l_f": True,
+                    "qfix": self.force_convergence["qfix"],
+                    "forcealpha": self.force_convergence["forcealpha"],
+                    "forcemix": self.force_convergence["forcemix"],
+                }
+            )
 
         # 4. ggf. make custom modifications using the FleurXMLmodifier
         if inp_changes:
@@ -133,7 +145,7 @@ class FleurTemplate(CalculatorTemplate):
 
     def execute(self, directory, profile) -> None:
         """
-        Execute Fleur multiple times unitl the calculation is either converged
+        Execute Fleur multiple times until the calculation is either converged
         or a maximum number of iterations is reached
 
         :param directory: Path to the calculation directory
