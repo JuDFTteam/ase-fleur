@@ -54,6 +54,8 @@ class FleurProfile:
         with open(outputfile, "w", encoding="utf8") as fd:
             with open(error_file, "w", encoding="utf8") as ferr:
                 check_call(self.argv, stdout=fd, stderr=ferr, cwd=directory)
+        with open(outputfile) as f:
+            print(f.read())
 
     def run_inpgen(self, directory, inputfile, outputfile, error_file):
         """
