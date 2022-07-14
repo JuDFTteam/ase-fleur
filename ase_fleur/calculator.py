@@ -185,8 +185,10 @@ class FleurTemplate(CalculatorTemplate):
         distance = fleur_results.get(MAGNETIC_DISTANCE_KEY, fleur_results.get(DISTANCE_KEY))
         if distance is None:
             raise ValueError("Could not find charge density distance in output file")
-        print(distance)
-        distance = distance[-1]
+        if fleur_results["fleur_modes"]["relax"]:
+            distance = distance[-2]
+        else:
+            distance = distance[-1]
 
         return distance < self.density_converged
 
