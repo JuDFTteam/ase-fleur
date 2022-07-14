@@ -107,3 +107,52 @@ def test_read_fleur_outxml():
             )
         ),
     }
+
+
+def test_read_fleur_outxml_magnetic():
+    atoms = read(TEST_FILES_DIR / "out_magnetic.xml")
+
+    param = 1.804494289
+    assert all(atoms.symbols == "Fe2")
+    assert atoms.positions == pytest.approx(np.array([[0, 0, 0]]))
+    assert all(atoms.pbc)
+    assert atoms.cell[:] == pytest.approx(np.array([[0, param, param], [param, 0, param], [param, param, 0]]))
+
+    assert dict(atoms.calc.properties()) == {
+        "free_energy": pytest.approx(-34642.48614156948),
+        "natoms": 1,
+        "charges": pytest.approx(np.array([25.0630064])),
+        "fermi_level": pytest.approx(0.322012778),
+        "energy": pytest.approx(-34642.48614156948),
+        "ibz_kpoints": pytest.approx(np.array([[0.0, 0.0, 0.0]])),
+        "kpoint_weights": pytest.approx(np.array([1])),
+        "magmom": pytest.approx(3.9362688000000006),
+        "magmoms": pytest.approx(np.array([3.93482625])),
+        "nkpts": 1,
+        "nbands": 14,
+        "nspins": 1,  # 1 because the system is non-collinear
+        "eigenvalues": pytest.approx(
+            np.array(
+                [
+                    [
+                        [
+                            0.03188352,
+                            0.07041465,
+                            0.19753007,
+                            0.19830856,
+                            0.23418157,
+                            0.24844237,
+                            0.26124592,
+                            0.32201278,
+                            0.34943278,
+                            0.34977853,
+                            0.39773002,
+                            0.43696835,
+                            1.07972073,
+                            1.09726426,
+                        ]
+                    ]
+                ]
+            )
+        ),
+    }
