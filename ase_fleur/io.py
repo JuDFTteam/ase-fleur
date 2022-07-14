@@ -259,7 +259,8 @@ def read_fleur_outxml(fileobj, index=-1, read_eigenvalues=True):
         results_dict["magmom"] = results[MAGMOM_KEY]
 
     if FORCES_KEY in results:
-        results_dict["forces"] = np.array(_per_type_to_per_atom(results[FORCES_KEY], equivalent_atoms))
+        forces = [force for _, force in results[FORCES_KEY]]
+        results_dict["forces"] = np.array(_per_type_to_per_atom(forces, equivalent_atoms))
 
     kpts = []
     if read_eigenvalues and tag_exists(xmltree, schema_dict, "eigenvalues", iteration_path=True):
