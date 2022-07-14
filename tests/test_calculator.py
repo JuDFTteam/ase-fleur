@@ -4,6 +4,7 @@ Tests of the fleur calculator class
 """
 from ase.build import bulk
 import pytest
+import numpy as np
 
 
 def verify(calc):
@@ -32,7 +33,7 @@ def test_force(factory):
     """
     atoms = bulk("Si")
     atoms.calc = factory.calc()
-    assert atoms.get_forces() == []
+    assert atoms.get_forces() == pytest.approx(np.array([[0, 0, 0], [0, 0, 0]]))
     verify(atoms.calc)
 
 

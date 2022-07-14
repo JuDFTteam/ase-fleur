@@ -240,10 +240,8 @@ def read_fleur_outxml(fileobj, index=-1, read_eigenvalues=True):
     atomtype_charges = results.get("atom_charges")
     atom_charges = []
     if atomtype_charges:
-        for charge, n_equiv in zip(atomtype_charges, equivalent_atoms):
-            atom_charges.extend([charge] * n_equiv)
+        atom_charges = _per_type_to_per_atom(atomtype_charges, equivalent_atoms)
     atom_charges = np.array(atom_charges)
-
 
     results_dict = {
         "efermi": results.get("fermi_energy"),
@@ -254,14 +252,14 @@ def read_fleur_outxml(fileobj, index=-1, read_eigenvalues=True):
     }
 
     if MAGMOM_KEY in results:
-        results_dict["magmoms"] = np.array(results[MAGMOMS_KEY])
+        magmoms = results[MAGMOMS_KEY]
+        if not isinstance(magmoms, list):
+            magmoms = [magmoms]
+        results_dict["magmoms"] = np.array(_per_type_to_per_atom(magmoms, equivalent_atoms))
         results_dict["magmom"] = results[MAGMOM_KEY]
 
     if FORCES_KEY in results:
-        forces = []
-        for (_, force), n_equiv in zip(results[FORCES_KEY], equivalent_atoms):
-            forces.extend([force] * n_equiv)
-        results_dict["forces"] = forces
+        results_dict["forces"] = np.array(_per_type_to_per_atom(results[FORCES_KEY], equivalent_atoms))
 
     kpts = []
     if read_eigenvalues and tag_exists(xmltree, schema_dict, "eigenvalues", iteration_path=True):
@@ -286,6 +284,22 @@ def read_fleur_outxml(fileobj, index=-1, read_eigenvalues=True):
         calc.kpts = kpts
     structure.calc = calc
     return structure
+
+
+def _per_type_to_per_atom(data, equiv_atoms):
+    """
+    Transform a quantity from given per atom type to given
+    per atom
+
+    :param data: data to be transformed, atom tpye index assumed to be first
+    :param equiv_atoms: list of number of equivalent atoms
+
+    :returns: data per atom
+    """
+    result = []
+    for per_type, n_equiv in zip(data, equiv_atoms):
+        result.extend([per_type] * n_equiv)
+    return result
 
 
 @writer
