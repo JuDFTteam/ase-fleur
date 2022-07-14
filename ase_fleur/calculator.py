@@ -177,7 +177,7 @@ class FleurTemplate(CalculatorTemplate):
 
         :param directory: Path to the calculation directory
         """
-        fleur_results = outxml_parser(directory / self.output_file)
+        fleur_results = outxml_parser(directory / self.output_file, iteration_to_parse="all")
 
         MAGNETIC_DISTANCE_KEY = "overall_density_convergence"
         DISTANCE_KEY = "density_convergence"
@@ -185,6 +185,7 @@ class FleurTemplate(CalculatorTemplate):
         distance = fleur_results.get(MAGNETIC_DISTANCE_KEY, fleur_results.get(DISTANCE_KEY))
         if distance is None:
             raise ValueError("Could not find charge density distance in output file")
+        distance = distance[-1]
 
         return distance < self.density_converged
 
