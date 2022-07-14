@@ -244,6 +244,7 @@ def read_fleur_outxml(fileobj, index=-1, read_eigenvalues=True):
             atom_charges.extend([charge] * n_equiv)
     atom_charges = np.array(atom_charges)
 
+
     results_dict = {
         "efermi": results.get("fermi_energy"),
         "free_energy": results.get("energy"),
@@ -257,7 +258,10 @@ def read_fleur_outxml(fileobj, index=-1, read_eigenvalues=True):
         results_dict["magmom"] = results[MAGMOM_KEY]
 
     if FORCES_KEY in results:
-        results_dict["forces"] = np.array([force for _, force in results[FORCES_KEY]])
+        forces = []
+        for (_, force), n_equiv in zip(results[FORCES_KEY], equivalent_atoms):
+            forces.extend([force] * n_equiv)
+        results_dict["forces"] = forces
 
     kpts = []
     if read_eigenvalues and tag_exists(xmltree, schema_dict, "eigenvalues", iteration_path=True):
