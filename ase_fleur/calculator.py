@@ -140,7 +140,7 @@ class FleurTemplate(CalculatorTemplate):
         if inp_changes:
             fm.add_task_list(inp_changes)
 
-        xmltree = fm.modify_xmlfile(directory / "inp.xml")
+        xmltree, _ = fm.modify_xmlfile(directory / "inp.xml")
         xmltree.write(directory / "inp.xml", encoding="utf-8", pretty_print=True)
 
     def execute(self, directory, profile) -> None:
