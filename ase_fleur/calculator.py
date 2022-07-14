@@ -56,6 +56,8 @@ class FleurProfile:
                 check_call(self.argv, stdout=fd, stderr=ferr, cwd=directory)
         with open(outputfile) as f:
             print(f.read())
+        with open(directory / "out.xml") as f:
+            print(f.read())
 
     def run_inpgen(self, directory, inputfile, outputfile, error_file):
         """
