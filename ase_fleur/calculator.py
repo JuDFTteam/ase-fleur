@@ -182,7 +182,7 @@ class FleurTemplate(CalculatorTemplate):
         if distance is None:
             raise ValueError("Could not find charge density distance in output file")
 
-        return distance < self.distance_converged
+        return distance < self.density_converged
 
     def read_results(self, directory):
         """
