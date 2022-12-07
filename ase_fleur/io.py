@@ -21,7 +21,7 @@ from ase.utils.plugins import ExternalIOFormat
 
 from masci_tools.io.fleur_inpgen import write_inpgen_file, read_inpgen_file
 from masci_tools.io.fleur_xml import load_inpxml, load_outxml
-from masci_tools.io.common_functions import convert_to_pystd
+from masci_tools.io.common_functions import convert_to_pystd, AtomSiteProperties
 from masci_tools.util.xml.xml_getters import get_structure_data, get_kpoints_data
 from masci_tools.util.schema_dict_util import (
     eval_simple_xpath,
@@ -73,7 +73,7 @@ def read_fleur_inpgen(fileobj, index=-1):
 
     # Last parameter is lapw parameters and is not used here
     cell, atoms, pbc, _ = read_inpgen_file(fileobj)
-    positions, symbols, _ = zip(*atoms)
+    positions, symbols = zip(*[(site.position, site.symbol) for site in atoms])
 
     return Atoms(symbols=symbols, positions=positions, pbc=pbc, cell=cell)
 
@@ -99,7 +99,7 @@ def read_fleur_xml(fileobj, index=-1):
         xmltree, schema_dict = load_inpxml(fileobj)
 
     atoms, cell, pbc = get_structure_data(xmltree, schema_dict)
-    positions, symbols, _ = zip(*atoms)
+    positions, symbols = zip(*[(site.position, site.symbol) for site in atoms])
 
     return Atoms(symbols=symbols, positions=positions, pbc=pbc, cell=cell)
 
@@ -318,7 +318,7 @@ def write_fleur_inpgen(fileobj, atoms, parameters=None, **kwargs):
     -------
     """
 
-    atom_sites = [(atom.position, atom.symbol, atom.symbol) for atom in atoms]
+    atom_sites = [AtomSiteProperties(position=atom.position, symbol=atom.symbol, kind=atom.symbol) for atom in atoms]
 
     write_inpgen_file(
         atoms.cell,
