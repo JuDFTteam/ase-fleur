@@ -2,14 +2,18 @@
 """
 This module defines a calculator for the Fleur code starting from version v27
 """
+from __future__ import annotations
+
 from pathlib import Path
 import warnings
 import re
+from typing import Any
 
 from masci_tools.io.fleurxmlmodifier import FleurXMLModifier
 from masci_tools.io.parsers.fleur import outxml_parser
 
 from ase.calculators.genericfileio import GenericFileIOCalculator, CalculatorTemplate
+from ase import Atoms
 
 from ase_fleur.io import write_fleur_inpgen, read_fleur_outxml
 
@@ -22,7 +26,7 @@ class FleurProfile:
     :param inpgen_argv: arguments for the input generator for the Fleur code
     """
 
-    def __init__(self, argv, inpgen_argv):
+    def __init__(self, argv: list[str], inpgen_argv: list[str]) -> None:
         self.argv = argv
         self.inpgen_argv = inpgen_argv
 
@@ -41,7 +45,7 @@ class FleurProfile:
             raise ValueError(f"Could not retrieve version from output: {out}")
         return m[0].strip()
 
-    def run(self, directory, outputfile, error_file):
+    def run(self, directory: Path, outputfile: Path | str, error_file: Path | str) -> None:
         """
         Run Fleur in the given directory
 
@@ -55,7 +59,9 @@ class FleurProfile:
             with open(error_file, "w", encoding="utf8") as ferr:
                 check_call(self.argv, stdout=fd, stderr=ferr, cwd=directory)
 
-    def run_inpgen(self, directory, inputfile, outputfile, error_file):
+    def run_inpgen(
+        self, directory: Path, inputfile: Path | str, outputfile: Path | str, error_file: Path | str
+    ) -> None:
         """
         Run inpgen in the given directory
 
@@ -76,7 +82,7 @@ class FleurTemplate(CalculatorTemplate):
     Template defining a Fleur Calculation
     """
 
-    def __init__(self, *, inpgen_profile):
+    def __init__(self, *, inpgen_profile: FleurProfile) -> None:
         super().__init__(
             name="fleur",
             implemented_properties=("energy", "forces", "magmom", "magmoms", "efermi", "free_energy", "charges"),
@@ -90,7 +96,7 @@ class FleurTemplate(CalculatorTemplate):
         self.density_converged = 1e-6
         self.force_convergence = {"force_converged": 0.002, "qfix": 2, "forcealpha": 1.0, "forcemix": "straight"}
 
-    def write_input(self, directory, atoms, parameters, properties):
+    def write_input(self, directory: Path, atoms: Atoms, parameters: dict[str, Any], properties: list[str]) -> None:
         """
         Create Fleur inp.xml file from atoms object by calling the
         Fleur inpgen
@@ -143,7 +149,7 @@ class FleurTemplate(CalculatorTemplate):
         xmltree, _ = fm.modify_xmlfile(directory / "inp.xml")
         xmltree.write(directory / "inp.xml", encoding="utf-8", pretty_print=True)
 
-    def execute(self, directory, profile) -> None:
+    def execute(self, directory: Path, profile: FleurProfile) -> None:
         """
         Execute Fleur multiple times until the calculation is either converged
         or a maximum number of iterations is reached
@@ -157,7 +163,7 @@ class FleurTemplate(CalculatorTemplate):
             profile.run(directory, self.stdout_file, self.error_file)
             converged = self.check_convergence(directory)
 
-    def execute_inpgen(self, directory, profile, inputfile) -> None:
+    def execute_inpgen(self, directory: Path, profile: FleurProfile, inputfile: Path) -> None:
         """
         Execute Fleur inpgen to create the Fleur inp.xml
 
@@ -167,7 +173,7 @@ class FleurTemplate(CalculatorTemplate):
         """
         profile.run_inpgen(directory, inputfile, self.stdout_file, self.error_file)
 
-    def check_convergence(self, directory):
+    def check_convergence(self, directory: Path) -> bool:
         """
         Check if the calculation is converged
 
@@ -188,7 +194,7 @@ class FleurTemplate(CalculatorTemplate):
 
         return distance < self.density_converged
 
-    def read_results(self, directory):
+    def read_results(self, directory: Path) -> dict[str, Any]:
         """
         Read the calculation results from the produced out.xml
 
@@ -203,7 +209,7 @@ class Fleur(GenericFileIOCalculator):
     Ase Calculator for FLEUR calculations
     """
 
-    def __init__(self, *, profile=None, directory=".", **kwargs):
+    def __init__(self, *, profile: FleurProfile | None = None, directory: str | Path = ".", **kwargs: Any) -> None:
 
         if profile is None:
             profile = FleurProfile(["fleur"], ["inpgen"])
