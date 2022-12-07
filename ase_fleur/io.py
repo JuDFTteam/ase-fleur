@@ -10,7 +10,9 @@ The package masci-tools (version 0.4.11 or greater) is required by this module:
     masci-tools - https://pypi.org/project/masci-tools/
 
 """
+from __future__ import annotations
 import io
+from pathlib import Path
 
 import numpy as np
 
@@ -33,6 +35,8 @@ from masci_tools.util.schema_dict_util import (
 from masci_tools.util.parse_utils import Conversion
 from masci_tools.io.parsers.fleur import outxml_parser, conversion_function
 
+from typing import TextIO, Any, BinaryIO
+from logging import Logger
 
 inpgen_format = ExternalIOFormat(
     desc="FLEUR inpgen input file",
@@ -57,7 +61,7 @@ outxml_format = ExternalIOFormat(
 )
 
 
-def read_fleur_inpgen(fileobj, index=-1):
+def read_fleur_inpgen(fileobj: TextIO | BinaryIO | Path, index: int = -1) -> Atoms:
     """Reads structure from fleur inpgen file.
 
     Parameters
@@ -78,7 +82,7 @@ def read_fleur_inpgen(fileobj, index=-1):
     return Atoms(symbols=symbols, positions=positions, pbc=pbc, cell=cell)
 
 
-def read_fleur_xml(fileobj, index=-1):
+def read_fleur_xml(fileobj: TextIO | BinaryIO | Path, index: int = -1) -> Atoms:
     """Reads structure from fleur xml file.
 
     Parameters
@@ -140,7 +144,7 @@ FORCES_KEY = "force_atoms"
 
 
 @conversion_function
-def calculate_total_charge_atoms(out_dict, logger):
+def calculate_total_charge_atoms(out_dict: dict[str, Any], logger: Logger) -> dict[str, Any]:
     """
     Calculate the the total charge per atom
 
@@ -199,7 +203,7 @@ def calculate_total_charge_atoms(out_dict, logger):
     return out_dict
 
 
-def read_fleur_outxml(fileobj, index=-1, read_eigenvalues=True):
+def read_fleur_outxml(fileobj: TextIO | BinaryIO | Path, index: int = -1, read_eigenvalues: bool = True) -> Atoms:
     """Reads structure and results from fleur out.xml file.
 
     Parameters
@@ -224,7 +228,7 @@ def read_fleur_outxml(fileobj, index=-1, read_eigenvalues=True):
     weights = np.array(weights)
     weights = weights / np.sum(weights)
 
-    parser_warnings = {}
+    parser_warnings: dict[str, Any] = {}
     results = outxml_parser(xmltree, parser_info_out=parser_warnings, additional_tasks=OUTXML_ADDITIONAL_TASKS)
 
     # The outxml_parser can only easily supply the charges per atom type for now
@@ -287,7 +291,7 @@ def read_fleur_outxml(fileobj, index=-1, read_eigenvalues=True):
     return structure
 
 
-def _per_type_to_per_atom(data, equiv_atoms):
+def _per_type_to_per_atom(data: list[Any], equiv_atoms: list[int]) -> list[Any]:
     """
     Transform a quantity from given per atom type to given
     per atom
@@ -304,7 +308,7 @@ def _per_type_to_per_atom(data, equiv_atoms):
 
 
 @writer
-def write_fleur_inpgen(fileobj, atoms, parameters=None, **kwargs):
+def write_fleur_inpgen(fileobj: TextIO | Path, atoms: Atoms, parameters: dict[str, Any] | None = None, **kwargs: Any):
     """writes fleur input structure in inpgen input file
 
     Parameters
