@@ -77,7 +77,7 @@ class FleurProfile:
                 check_call(self.inpgen_argv + ["-f", str(inputfile)], stdout=fd, stderr=ferr, cwd=directory)
 
 
-class FleurTemplate(CalculatorTemplate):
+class FleurTemplate(CalculatorTemplate):  # type: ignore[misc]
     """
     Template defining a Fleur Calculation
     """
@@ -118,7 +118,7 @@ class FleurTemplate(CalculatorTemplate):
             parameters["title"] = "Fleur inpgen input generated from ASE"
         else:
             if all(s not in parameters["title"] for s in ("inpgen", "input generator")):
-                warnings.warn("inpgen or inputgenerator has to appear in the inpgen file title" "Added to the end")
+                warnings.warn("inpgen or inputgenerator has to appear in the inpgen file title. Added to the end")
                 parameters["title"] += " (inpgen)"
 
         inputfile = directory / "fleur.in"
@@ -204,7 +204,7 @@ class FleurTemplate(CalculatorTemplate):
         return dict(atoms.calc.properties())
 
 
-class Fleur(GenericFileIOCalculator):
+class Fleur(GenericFileIOCalculator):  # type: ignore[misc]
     """
     Ase Calculator for FLEUR calculations
     """
