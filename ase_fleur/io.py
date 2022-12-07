@@ -308,7 +308,9 @@ def _per_type_to_per_atom(data: list[Any], equiv_atoms: list[int]) -> list[Any]:
 
 
 @writer
-def write_fleur_inpgen(fileobj: TextIO | Path, atoms: Atoms, parameters: dict[str, Any] | None = None, **kwargs: Any):
+def write_fleur_inpgen(
+    fileobj: TextIO | Path, atoms: Atoms, parameters: dict[str, Any] | None = None, **kwargs: Any
+) -> None:
     """writes fleur input structure in inpgen input file
 
     Parameters

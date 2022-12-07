@@ -68,7 +68,14 @@ ignore = ["D105","D2","D4"]
 match-dir="(?!(tests)).*"
 
 [tool.mypy]
-ignore_missing_imports = true
+python_version = "3.8"
+warn_unused_ignores = true
+warn_redundant_casts = true
+no_implicit_optional = true
+show_error_codes = true
+warn_no_return = true
+disallow_incomplete_defs = true
+disallow_subclassing_any = true
 
 [tool.black]
 line-length = 120
