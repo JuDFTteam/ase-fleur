@@ -210,7 +210,6 @@ class Fleur(GenericFileIOCalculator):  # type: ignore[misc]
     """
 
     def __init__(self, *, profile: FleurProfile | None = None, directory: str | Path = ".", **kwargs: Any) -> None:
-
         if profile is None:
             profile = FleurProfile(["fleur"], ["inpgen"])
 
