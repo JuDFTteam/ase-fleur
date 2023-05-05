@@ -24,7 +24,7 @@ from ase.utils.plugins import ExternalIOFormat
 from masci_tools.io.fleur_inpgen import write_inpgen_file, read_inpgen_file
 from masci_tools.io.fleur_xml import load_inpxml, load_outxml
 from masci_tools.io.common_functions import convert_to_pystd, AtomSiteProperties
-from masci_tools.util.xml.xml_getters import get_structure_data, get_kpoints_data
+from masci_tools.util.xml.xml_getters import get_structuredata, get_kpointsdata
 from masci_tools.util.schema_dict_util import (
     eval_simple_xpath,
     get_number_of_nodes,
