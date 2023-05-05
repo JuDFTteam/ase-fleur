@@ -51,10 +51,8 @@ jobs:
     - name: pytest
       run: |
         pytest
-    - name: Upload code coverage report
-      run: |
-        pip install codecov
-        codecov
+    - name: Upload to Codecov
+      uses: codecov/codecov-action@v3
 
   calulator-test:
     name: Test Fleur Calculator
@@ -102,7 +100,6 @@ jobs:
           mkdir -p ~/.config/ase
           cp test-files/ase_test.conf ~/.config/ase/ase.conf
           pytest --calculator
-      - name: Upload code coverage report
-        run: |
-          pip install codecov
-          codecov
+      
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v3
