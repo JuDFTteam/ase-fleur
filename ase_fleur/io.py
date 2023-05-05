@@ -102,7 +102,7 @@ def read_fleur_xml(fileobj: TextIO | BinaryIO | Path, index: int = -1) -> Atoms:
             fileobj.seek(0)
         xmltree, schema_dict = load_inpxml(fileobj)
 
-    atoms, cell, pbc = get_structure_data(xmltree, schema_dict)
+    atoms, cell, pbc = get_structuredata(xmltree, schema_dict)
     positions, symbols = zip(*[(site.position, site.symbol) for site in atoms])
 
     return Atoms(symbols=symbols, positions=positions, pbc=pbc, cell=cell)
@@ -221,7 +221,7 @@ def read_fleur_outxml(fileobj: TextIO | BinaryIO | Path, index: int = -1, read_e
     if isinstance(fileobj, io.IOBase):
         fileobj.seek(0)
     xmltree, schema_dict = load_outxml(fileobj)
-    kpoints, weights, cell, pbc = get_kpoints_data(xmltree, schema_dict, only_used=True, convert_to_angstroem=False)
+    kpoints, weights, cell, pbc = get_kpointsdata(xmltree, schema_dict, only_used=True, convert_to_angstroem=False)
 
     reciprocal_cell = np.linalg.inv(cell) * 2 * np.pi
     kpoints_cartesian = np.array(kpoints) @ reciprocal_cell
