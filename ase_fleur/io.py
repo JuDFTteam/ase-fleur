@@ -24,7 +24,7 @@ from ase.utils.plugins import ExternalIOFormat
 from masci_tools.io.fleur_inpgen import write_inpgen_file, read_inpgen_file
 from masci_tools.io.fleur_xml import load_inpxml, load_outxml
 from masci_tools.io.common_functions import convert_to_pystd, AtomSiteProperties
-from masci_tools.util.xml.xml_getters import get_structure_data, get_kpoints_data
+from masci_tools.util.xml.xml_getters import get_structuredata, get_kpointsdata
 from masci_tools.util.schema_dict_util import (
     eval_simple_xpath,
     get_number_of_nodes,
@@ -102,7 +102,7 @@ def read_fleur_xml(fileobj: TextIO | BinaryIO | Path, index: int = -1) -> Atoms:
             fileobj.seek(0)
         xmltree, schema_dict = load_inpxml(fileobj)
 
-    atoms, cell, pbc = get_structure_data(xmltree, schema_dict)
+    atoms, cell, pbc = get_structuredata(xmltree, schema_dict)
     positions, symbols = zip(*[(site.position, site.symbol) for site in atoms])
 
     return Atoms(symbols=symbols, positions=positions, pbc=pbc, cell=cell)
@@ -221,7 +221,7 @@ def read_fleur_outxml(fileobj: TextIO | BinaryIO | Path, index: int = -1, read_e
     if isinstance(fileobj, io.IOBase):
         fileobj.seek(0)
     xmltree, schema_dict = load_outxml(fileobj)
-    kpoints, weights, cell, pbc = get_kpoints_data(xmltree, schema_dict, only_used=True, convert_to_angstroem=False)
+    kpoints, weights, cell, pbc = get_kpointsdata(xmltree, schema_dict, only_used=True, convert_to_angstroem=False)
 
     reciprocal_cell = np.linalg.inv(cell) * 2 * np.pi
     kpoints_cartesian = np.array(kpoints) @ reciprocal_cell
