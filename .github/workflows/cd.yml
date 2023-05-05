@@ -1,129 +1,40 @@
-name: continous-deployment
+name: continuous-deployment
 
 on:
-  push:
-    tags:
-      - "v[0-9]+.[0-9]+.[0-9]+*"
+  release:
+    types: [created]
+  workflow_dispatch:
 
 jobs:
 
-  linting:
-    runs-on: ubuntu-latest
-    strategy:
-      max-parallel: 4
-      matrix:
-        python-version: [3.8]
-
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        pip install git+https://gitlab.com/ase/ase.git@master
-        pip install -e .[pre-commit,testing]
-    - name: Run pre-commit
-      run: |
-        pre-commit run --all-files || (git status --short; git diff ; exit 1)
-  tests:
-
-    strategy:
-      max-parallel: 20
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest]
-        python-version: ["3.7","3.8","3.9","3.10"]
-
-    runs-on: ${{ matrix.os }}
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        pip install git+https://gitlab.com/ase/ase.git@master
-        pip install -e .[testing]
-    - name: pytest
-      run: |
-        pytest
-    - name: Upload code coverage report
-      run: |
-        pip install codecov
-        codecov
-
-  calulator-test:
-    name: Test Fleur Calculator
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest]
-        python-version: ["3.8",]
-        fleur-version: ["6.0"]
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install dependencies
-        run: |
-          pip install git+https://gitlab.com/ase/ase.git@master
-          pip install -e .[testing]
-
-      - name: Setup Conda
-        uses: s-weigand/setup-conda@v1
-        with:
-          conda-channels: conda-forge
-          update-conda: true
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install mamba
-        run: |
-          conda --version
-          conda install mamba
-
-      - name: Install Fleur code from conda
-        run: |
-          mamba install fleur=${{ matrix.fleur-version }}
-          fleur_MPI -h
-          inpgen -h
-
-      - name: pytest
-        run: |
-          mkdir -p ~/.config/ase
-          cp test-files/ase_test.conf ~/.config/ase/ase.conf
-          pytest --calculator
-      - name: Upload code coverage report
-        run: |
-          pip install codecov
-          codecov
+  ci:
+    uses: ./.github/workflows/ci.yml
 
   publish:
     name: Publish to PyPi
-    needs: [tests, linting]
-    if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+    needs: [ci]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4.6.0
         with:
-          python-version: 3.8
+          python-version: 3.9
       - name: Install flit
         run: |
           pip install flit~=3.4
+
+      - name: Build and Publish to TestPyPi
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          flit publish
+        env:
+          FLIT_USERNAME: __token__
+          FLIT_PASSWORD: ${{ secrets.PYPI_KEY }}
+          FLIT_INDEX_URL: https://test.pypi.org/legacy/
+
       - name: Build and Publish to PyPi
+        if: github.event_name == 'release'
         run: |
           flit publish
         env:
