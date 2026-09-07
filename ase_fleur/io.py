@@ -10,6 +10,7 @@ The package masci-tools (version 0.4.11 or greater) is required by this module:
     masci-tools - https://pypi.org/project/masci-tools/
 
 """
+
 from __future__ import annotations
 import io
 from pathlib import Path
