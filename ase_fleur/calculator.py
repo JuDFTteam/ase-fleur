@@ -2,6 +2,7 @@
 """
 This module defines a calculator for the Fleur code starting from version v27
 """
+
 from __future__ import annotations
 
 from pathlib import Path
