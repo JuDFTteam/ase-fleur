@@ -2,6 +2,7 @@
 """
 Test configuration
 """
+
 from ase_fleur.calculator import FleurProfile, Fleur
 from ase.test.factories import factory as factory_dec, Factories, CalculatorInputs
 from ase.utils import workdir
