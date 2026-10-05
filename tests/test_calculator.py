@@ -2,6 +2,7 @@
 """
 Tests of the fleur calculator class
 """
+
 from ase.build import bulk
 import pytest
 import numpy as np

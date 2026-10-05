@@ -2,6 +2,7 @@
 """
 ASE package for interfacing with the FLEUR code
 """
+
 from ase.calculators.calculator import register_calculator_class
 from ase_fleur.calculator import Fleur, FleurProfile
 
